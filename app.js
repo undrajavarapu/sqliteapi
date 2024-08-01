@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const AUTH_TOKEN = "your_secret_token";
+const AUTH_TOKEN = process.env.AUTH_TOKEN ;//|| "your_secret_token";
 
 // Middleware to check X-Auth-Token
 const authenticateToken = (req, res, next) => {
@@ -33,18 +33,18 @@ app.post('/api/category',authenticateToken, (req, res) => {
 });
 
 // Get all users
-app.get('/api/category', (req, res) => {
+app.get('/api/category',authenticateToken, (req, res) => {
     const sql = 'SELECT * FROM songs_category';
     db.all(sql, [], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
-        res.json({ users: rows });
+        res.json({ categories: rows });
     });
 });
 
 // Get a single user by ID
-app.get('/api/category/:id', (req, res) => {
+app.get('/api/category/:id',authenticateToken, (req, res) => {
     const { id } = req.params;
     const sql = 'SELECT * FROM songs_category WHERE id = ?';
     db.get(sql, [id], (err, row) => {
@@ -59,7 +59,7 @@ app.get('/api/category/:id', (req, res) => {
 });
 
 // Update a user by ID
-app.put('/api/users/:id', (req, res) => {
+app.put('/api/category/:id', authenticateToken,(req, res) => {
     const { id } = req.params;
     const {type_id, name } = req.body;
     const sql = 'UPDATE songs_category SET type_id = ?, name = ? WHERE id = ?';
@@ -75,7 +75,7 @@ app.put('/api/users/:id', (req, res) => {
 });
 
 // Delete a user by ID
-app.delete('/api/category/:id', (req, res) => {
+app.delete('/api/category/:id',authenticateToken, (req, res) => {
     const { id } = req.params;
     const sql = 'DELETE FROM songs_category WHERE id = ?';
     db.run(sql, [id], function(err) {
@@ -83,7 +83,7 @@ app.delete('/api/category/:id', (req, res) => {
             return res.status(500).json({ error: err.message });
         }
         if (this.changes === 0) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'Category not found' });
         }
         res.json({ deleted: this.changes });
     });
@@ -108,6 +108,45 @@ app.post('/api/song',authenticateToken, (req, res) => {
     });
 });
 
+app.put('/api/song/:id',authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const {title,content,update_time,is_custom,is_locked,state,version_number,songurl} = req.body;
+    const sql = 'UPDATE songs_song SET title=?,content=?,update_time=?,is_custom=?,is_locked=?,state=?,version_number=?,songurl=? WHERE id = ?';
+    db.run(sql, [ title,content,update_time,is_custom,is_locked,state,version_number,songurl, id], function(err) {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ error: 'Song not found' });
+        }
+        res.json({ updated: this.changes });
+    });
+});
+
+app.get('/api/song/:id',authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const sql = 'SELECT * FROM songs_song WHERE id = ?';
+    db.get(sql, [id], (err, row) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        if (!row) {
+            return res.status(404).json({ error: 'Song not found' });
+        }
+        res.json(row);
+    });
+});
+
+app.get('/api/song',authenticateToken, (req, res) => {
+   
+    const sql = 'SELECT * FROM songs_song ';
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ songs: rows });
+    });
+});
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
