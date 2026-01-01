@@ -6,7 +6,7 @@ node_modules/
 
 # Exclude local database files if they are modified during testing
 .sqlite
-*.sqlite-journal
+.sqlite-journal
 
 # Exclude logs
 npm-debug.log*
