@@ -1,3 +1,12 @@
+# Exclude sensitive environment variables
 .env
+
+# Exclude heavy dependencies (cloud hosts install these themselves)
+node_modules/
+
+# Exclude local database files if they are modified during testing
 *.sqlite
 *.sqlite-journal
+
+# Exclude logs
+npm-debug.log*
