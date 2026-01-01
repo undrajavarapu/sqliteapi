@@ -1,24 +1,37 @@
+require('dotenv').config(); 
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const AUTH_TOKEN = process.env.AUTH_TOKEN ;//|| "your_secret_token";
+const dbPath = path.join(__dirname, 'songs.sqlite');
+const db = new sqlite3.Database(dbPath);
 
 // Middleware to check X-Auth-Token
 const authenticateToken = (req, res, next) => {
     const token = req.headers['x-auth-token'];
+    
+    // Check if AUTH_TOKEN is actually set in the environment
+    if (!AUTH_TOKEN) {
+        console.error("Security Warning: AUTH_TOKEN is not set in environment variables!");
+        return res.status(500).json({ error: "Server configuration error" });
+    }
+
+    // Check if the provided token matches
     if (token !== AUTH_TOKEN) {
         return res.status(401).json({ error: "Unauthorized" });
     }
     next();
 };
 
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 
 // Connect to the SQLite database
-const db = new sqlite3.Database('./songs.sqlite');
+//const db = new sqlite3.Database('./songs.sqlite');
 
 // Create a new user
 app.post('/api/category',authenticateToken, (req, res) => {
