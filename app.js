@@ -1,4 +1,14 @@
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
+// Modern 2026 ES Module way to get directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const dbPath = join(__dirname, 'songs.sqlite');
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) console.error("Database connection error:", err.message);
+    else console.log("Connected to SQLite database.");
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 require('dotenv').config();
@@ -167,3 +177,4 @@ app.get('/api/song',authenticateToken, (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
